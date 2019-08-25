@@ -1,0 +1,7 @@
+---
+# vars file for ansible-freeipa-radius
+freeradius_packages:
+  - freeradius
+  - freeradius-utils
+  - freeradius-ldap
+  - freeradius-krb5

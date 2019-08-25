@@ -1,0 +1,88 @@
+---
+# tasks file for ansible-freeipa-radius
+- name: Install required package
+  package:
+    name: "{{ freeradius_packages }}"
+    state: present
+
+- name: Create groups for service accounts
+  ipa_group:
+    name: srv_accounts
+    gidnumber: 4269
+    state: present
+    ipa_host: "{{ groups['ipaservers'][0] }}"
+    ipa_user: admin
+    ipa_pass: "{{ ipaadmin_password }}"
+  run_once: true
+
+- name: Create user for service account
+  ipa_user:
+    name: "{{ ipasrv_accounts[0].name }}"
+    state: present
+    krbpasswordexpiration: 20401225120000
+    update_password: "on_create"
+    password: "{{ ipasrv_accounts[0].password }}"
+    givenname: "{{ ipasrv_accounts[0].name }}"
+    sn: "{{ ipasrv_accounts[0].name }}"
+    ipa_host: "{{ groups['ipaservers'][0] }}"
+    ipa_user: admin
+    ipa_pass: "{{ ipaadmin_password }}"
+  run_once: true
+
+- name: Add User to srv_accounts group
+  ipa_group:
+    name: srv_accounts
+    user:
+      - "{{ ipasrv_accounts[0].name }}"
+    ipa_host: "{{ groups['ipaservers'][0] }}"
+    ipa_user: admin
+    ipa_pass: "{{ ipaadmin_password }}"
+  run_once: true
+
+- name: Configure /etc/raddb/client.conf
+  template:
+    src: clients.conf.j2
+    dest: /etc/raddb/clients.conf
+    owner: root
+    group: radiusd
+    mode: "0640"
+  notify: restart radiusd
+
+- name: Configure /etc/raddb/sites-available/default
+  template:
+    src: default.j2
+    dest: /etc/raddb/sites-available/default
+    owner: root
+    group: radiusd
+    mode: "0774"
+  notify: restart radiusd
+
+- name: Configure /etc/raddb/sites-available/inner-tunnel
+  template:
+    src: inner-tunnel.j2
+    dest: /etc/raddb/sites-available/inner-tunnel
+    owner: root
+    group: radiusd
+    mode: "0774"
+  notify: restart radiusd
+
+- name: Link /etc/raddb/mods-available/ldap /etc/raddb/mods-enabled/ldap
+  file:
+    src: /etc/raddb/mods-available/ldap
+    dest: /etc/raddb/mods-enabled/ldap
+    state: link
+  notify: restart radiusd
+
+- name: Configure /etc/raddb/mods-available/ldap
+  template:
+    src: ldap.j2
+    dest: /etc/raddb/mods-available/ldap
+    owner: root
+    group: radiusd
+    mode: "0640"
+  notify: restart radiusd
+
+- name: Enable service radiusd
+  service:
+    name: radiusd
+    enabled: yes

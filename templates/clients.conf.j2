@@ -1,0 +1,22 @@
+# {{ ansible_managed }}
+#######################################################################
+#
+#  Define RADIUS clients (usually a NAS, Access Point, etc.).
+
+#
+#  Defines a RADIUS client.
+
+{% for subnet in freeradius_authorized_subnet %}
+client private-network-{{loop.index}} {
+        ipaddr = {{ subnet.address }}
+        netmask = {{ subnet.netmask}}
+        proto = *
+        nas_type = other
+        secret = {{ freeradius_secrets }}
+        limit {
+                max_connections = 30
+                lifetime = 0
+                idle_timeout = 30
+        }
+}
+{% endfor %}

@@ -1,0 +1,15 @@
+---
+# defaults file for ansible-freeipa-radius
+freeradius_secrets: password
+freeradius_authorized_subnet: 
+  - address: 172.16.10.0
+    netmask: 24
+  - address: 172.16.20.0
+    netmask: 24
+freeradius_basedn:
+  - infra
+  - lanets
+  - ca
+ipasrv_accounts:
+  - name: srv_radius
+    password: password
