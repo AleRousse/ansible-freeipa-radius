@@ -86,3 +86,13 @@
   service:
     name: radiusd
     enabled: yes
+
+- name: Create groups for freeradius
+  ipa_group:
+    name: "{{ item.name }}"
+    state: present
+    ipa_host: "{{ groups['ipaservers'][0] }}"
+    ipa_user: admin
+    ipa_pass: "{{ ipaadmin_password }}"
+  run_once: true
+  with_items:  "{{ freeradius_groups }}"
