@@ -10,3 +10,14 @@ freeradius_basedn:
 ipasrv_accounts:
   - name: srv_radius
     password: password
+freeradius_groups: []
+#  - name:
+#    cisco_priv_lvl:
+#    juniper_user_name:
+#    fortinet_group:
+# Or defined a NAS IDENTIFIER CONDITION
+#  - name:
+#    nas_identifier
+#    cisco_priv_lvl:
+#    juniper_user_name:
+#    fortinet_group:

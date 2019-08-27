@@ -706,7 +706,17 @@ post-auth {
 	update {
 		&reply: += &session-state:
 	}
-
+{% if freeradius_groups is defined  and freeradius_groups[0] is defined %}
+	{% for group in freeradius_groups %}
+    	if (LDAP-Group == {{ group.name }} {{ ('&& NAS-Identifier =~ /^' + group.nas_identifier + '/') if group.nas_identifier is defined }} ) {
+    	    update reply {
+    	        Juniper-Local-User-Name := "{{ group.juniper_user_name }}",
+				Cisco-AVPair := "shell:priv-lvl={{ group.cisco_priv_lvl }}",
+				Fortinet-Group-Name := "{{ group.fortinet_group }}"
+    	        }
+    	}
+	{% endfor %}
+{% endif %}
 	#  Get an address from the IP Pool.
 #	main_pool
 
